@@ -24,7 +24,7 @@ Particle::Particle(const char *name, double px, double py, double pz)
   if (FindParticleType(name) != -1) {
     fIndex = FindParticleType(name);
   } else {
-    throw std::invalid_argument("Particle type not found");
+    throw std::invalid_argument("particle type not found");
   }
 }
 
@@ -38,9 +38,9 @@ int Particle::FindParticleType(const char *name) const {
 }
 
 int Particle::GetIndex() const { return fIndex; }
-int Particle::GetPx() const { return fPx; }
-int Particle::GetPy() const { return fPy; }
-int Particle::GetPz() const { return fPz; }
+double Particle::GetPx() const { return fPx; }
+double Particle::GetPy() const { return fPy; }
+double Particle::GetPz() const { return fPz; }
 double Particle::GetMass() const { return fParticleTypes[fIndex]->GetMass(); }
 
 void Particle::SetIndex(const int index) {
@@ -87,8 +87,7 @@ void Particle::PrintParticleInfo() const {
 }
 
 double Particle::TotalEnergy() const {
-  return std::sqrt(fParticleTypes[fIndex]->GetMass() *
-                       fParticleTypes[fIndex]->GetMass() +
+  return std::sqrt((this->GetMass() * this->GetMass()) +
                    (fPx * fPx + fPy * fPy + fPz * fPz));
 }
 
@@ -101,12 +100,12 @@ double Particle::InvariantMass(const Particle &other) const {
 }
 
 int Particle::Decay2body(Particle &dau1, Particle &dau2) const {
-  if (GetMass() == 0.0) {
+  if (this->GetMass() == 0.0) {
     printf("Decayment cannot be preformed if mass is zero\n");
     return 1;
   }
 
-  double massMot = GetMass();
+  double massMot = this->GetMass();
   double massDau1 = dau1.GetMass();
   double massDau2 = dau2.GetMass();
 
@@ -118,12 +117,12 @@ int Particle::Decay2body(Particle &dau1, Particle &dau2) const {
 
     double invnum = 1. / RAND_MAX;
     do {
-      x1 = 2.0 * rand() * invnum - 1.0;
-      x2 = 2.0 * rand() * invnum - 1.0;
+      x1 = 2.0 * std::rand() * invnum - 1.0;
+      x2 = 2.0 * std::rand() * invnum - 1.0;
       w = x1 * x1 + x2 * x2;
     } while (w >= 1.0);
 
-    w = sqrt((-2.0 * log(w)) / w);
+    w = std::sqrt((-2.0 * log(w)) / w);
     y1 = x1 * w;
 
     massMot += fParticleTypes[fIndex]->GetWidth() * y1;
@@ -137,21 +136,22 @@ int Particle::Decay2body(Particle &dau1, Particle &dau2) const {
   }
 
   double pout =
-      sqrt(
+      std::sqrt(
           (massMot * massMot - (massDau1 + massDau2) * (massDau1 + massDau2)) *
           (massMot * massMot - (massDau1 - massDau2) * (massDau1 - massDau2))) /
       massMot * 0.5;
 
   double norm = 2 * M_PI / RAND_MAX;
 
-  double phi = rand() * norm;
-  double theta = rand() * norm * 0.5 - M_PI / 2.;
-  dau1.SetP(pout * sin(theta) * cos(phi), pout * sin(theta) * sin(phi),
-            pout * cos(theta));
-  dau2.SetP(-pout * sin(theta) * cos(phi), -pout * sin(theta) * sin(phi),
-            -pout * cos(theta));
+  double phi = std::rand() * norm;
+  double theta = std::rand() * norm * 0.5 - M_PI / 2.;
+  dau1.SetP(pout * std::sin(theta) * std::cos(phi),
+            pout * std::sin(theta) * std::sin(phi), pout * std::cos(theta));
+  dau2.SetP(-pout * std::sin(theta) * std::cos(phi),
+            -pout * std::sin(theta) * std::sin(phi), -pout * std::cos(theta));
 
-  double energy = sqrt(fPx * fPx + fPy * fPy + fPz * fPz + massMot * massMot);
+  double energy =
+      std::sqrt(fPx * fPx + fPy * fPy + fPz * fPz + massMot * massMot);
 
   double bx = fPx / energy;
   double by = fPy / energy;
@@ -164,19 +164,15 @@ int Particle::Decay2body(Particle &dau1, Particle &dau2) const {
 }
 
 void Particle::Boost(double bx, double by, double bz) {
-  double energy = TotalEnergy();
+  double energy = this->TotalEnergy();
 
   // Boost this Lorentz vector
   double b2 = bx * bx + by * by + bz * bz;
-  double gamma = 1.0 / sqrt(1.0 - b2);
+  double gamma = 1.0 / std::sqrt(1.0 - b2);
   double bp = bx * fPx + by * fPy + bz * fPz;
   double gamma2 = b2 > 0 ? (gamma - 1.0) / b2 : 0.0;
 
   fPx += gamma2 * bp * bx + gamma * bx * energy;
   fPy += gamma2 * bp * by + gamma * by * energy;
   fPz += gamma2 * bp * bz + gamma * bz * energy;
-}
-
-double VectorLength(const double x, const double y, const double z) {
-  return std::sqrt(x * x + y * y + z * z);
 }

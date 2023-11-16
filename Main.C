@@ -66,18 +66,17 @@ int Main() {
       double theta = gRandom->Uniform(0, M_PI);
       hPolar->Fill(theta);
 
-      // double p = gRandom->Exp(1.);
-      // hP->Fill(p);
-      // double px = p * sin(theta) * cos(phi);
-      // double py = p * sin(theta) * sin(phi);
-      // double pz = p * cos(theta);
-      // eventParticles[j].SetP(px, py, pz);
+      double p = gRandom->Exp(1.);
+      hP->Fill(p);
+      double px = p * std::sin(theta) * std::cos(phi);
+      double py = p * std::sin(theta) * std::sin(phi);
+      double pz = p * std::cos(theta);
+      eventParticles[j].SetP(px, py, pz);
 
-      // hTrsP->Fill(std::sqrt(px * px + py * py));
+      hTrsP->Fill(std::sqrt(px * px + py * py));
 
-      // hEnergy->Fill(eventParticles[j].TotalEnergy());
 
-      int rand = static_cast<int>(gRandom->Uniform(1., 101.));
+      int rand = (gRandom->Uniform(1., 101.));
       if (rand <= 80) {
         if (rand <= 40) {
           eventParticles[j].SetIndex("pione+");
@@ -102,28 +101,30 @@ int Main() {
           eventParticles[j].SetIndex("protone-");
           hParticleTypes->Fill(eventParticles[j].GetIndex());
         }
-      } else if (rand == 100) {
-        Printf("ECCOLO");
-
+      } else if ( rand == 100 ){
+        // non avevamo capito la logica di Decay2body()
         eventParticles[j].SetIndex("K*");
         hParticleTypes->Fill(eventParticles[j].GetIndex());
 
         Particle p1{};
         Particle p2{};
-        eventParticles[j].Decay2body(p1, p2);
 
         if (std::rand() % 2) {
           p1.SetIndex("pione+");
           p2.SetIndex("Kaone-");
-          resonanceDaughters.push_back(p1);
-          resonanceDaughters.push_back(p2);
         } else {
           p1.SetIndex("pione-");
           p2.SetIndex("Kaone+");
-          resonanceDaughters.push_back(p1);
-          resonanceDaughters.push_back(p2);
         }
+
+        eventParticles[j].Decay2body(p1, p2);
+
+        resonanceDaughters.push_back(p1);
+        resonanceDaughters.push_back(p2);
       }
+
+      hEnergy->Fill(eventParticles[j].TotalEnergy());
+
     }  // fine della generazione delle ~100 particelle
 
     // inserisco le "figlie" della risonanza in coda al vettore delle particelle
@@ -161,6 +162,7 @@ int Main() {
         }
       }
     }
+
     // massa invariante delle figlie delle risonanze (solo figlie provenienti
     // dalla stessa madre)
     for (int i = 0; i < static_cast<int>(resonanceDaughters.size()); i += 2) {
@@ -186,6 +188,9 @@ int Main() {
   hInvariantMass5->Write();
 
   file->Close(); */
+
+  hParticleTypes->Draw();
+  hInvariantMass5->Draw();
 
   return 0;
 }

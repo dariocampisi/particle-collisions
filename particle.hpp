@@ -12,9 +12,9 @@ class Particle {
   Particle(const char *name, double px = 0, double py = 0, double pz = 0);
 
   int GetIndex() const;
-  int GetPx() const;
-  int GetPy() const;
-  int GetPz() const;
+  double GetPx() const;
+  double GetPy() const;
+  double GetPz() const;
   double GetMass() const;
 
   void SetIndex(const int index);
