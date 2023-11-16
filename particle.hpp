@@ -15,6 +15,8 @@ class Particle {
   double GetPx() const;
   double GetPy() const;
   double GetPz() const;
+  double GetP() const;
+  double GetTrsP() const;
   double GetMass() const;
 
   void SetIndex(const int index);

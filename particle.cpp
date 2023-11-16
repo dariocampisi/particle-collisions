@@ -41,6 +41,10 @@ int Particle::GetIndex() const { return fIndex; }
 double Particle::GetPx() const { return fPx; }
 double Particle::GetPy() const { return fPy; }
 double Particle::GetPz() const { return fPz; }
+double Particle::GetP() const {
+  return std::sqrt(fPx * fPx + fPy * fPy + fPz * fPz);
+}
+double Particle::GetTrsP() const { return std::sqrt(fPx * fPx + fPy * fPy); }
 double Particle::GetMass() const { return fParticleTypes[fIndex]->GetMass(); }
 
 void Particle::SetIndex(const int index) {
