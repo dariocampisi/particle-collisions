@@ -38,6 +38,7 @@ int Particle::FindParticleType(const char *name) const {
 }
 
 int Particle::GetIndex() const { return fIndex; }
+int Particle::GetCharge() const { return fParticleTypes[fIndex]->GetCharge(); }
 double Particle::GetPx() const { return fPx; }
 double Particle::GetPy() const { return fPy; }
 double Particle::GetPz() const { return fPz; }

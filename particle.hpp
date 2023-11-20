@@ -12,6 +12,7 @@ class Particle {
   Particle(const char *name, double px = 0, double py = 0, double pz = 0);
 
   int GetIndex() const;
+  int GetCharge() const;
   double GetPx() const;
   double GetPy() const;
   double GetPz() const;
