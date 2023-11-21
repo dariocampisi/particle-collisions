@@ -185,7 +185,5 @@ int Main() {
 
   file->Close();
 
-  hImpulse->Draw();
-
   return 0;
 }

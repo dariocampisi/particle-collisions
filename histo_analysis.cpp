@@ -28,13 +28,14 @@ void HistoAnalysis() {
       hIMSameCharge,  hIMOppositePK, hIMSamePK,  hIMDecayParticles};
 
   // numero di ingressi per ogni istogramma
-  std::cout << "ENTRIES";
+  std::cout << "\n\n\nENTRIES-------------------------\n";
   for (auto histo : histoVector) {
     std::cout << "\n " << histo->GetTitle() << ": " << histo->GetEntries();
   }
 
   // distribuzione dei tipi di particelle
-  std::cout << "\n\nPARTICLE TYPES\n";
+  std::cout << "\n\nPARTICLE TYPES-------------------------\n\n";
+
   std::cout << " Pions (+): " << hParticleTypes->GetBinContent(1) << " i.e. "
             << 100 * hParticleTypes->GetBinContent(1) /
                    hParticleTypes->GetEntries()
@@ -64,14 +65,20 @@ void HistoAnalysis() {
                    hParticleTypes->GetEntries()
             << "%\n";
 
-  // fit uniforme delle distribuzioni degli angoli polare e azimutale
+  // fitting
+  // angolo polare
   TF1 *polarFit = new TF1("polar fit function", "[0]", 0., M_PI);
-  hPolar->Fit(polarFit, "Q");
+  hPolar->Fit(polarFit, "Q0");
 
+  // angolo azimutale
   TF1 *azimuthalFit = new TF1("azimuthal fit function", "[0]", 0., 2 * M_PI);
-  hAzimuthal->Fit(azimuthalFit, "Q");
+  hAzimuthal->Fit(azimuthalFit, "Q0");
 
-  std::cout << "\nFITTING\n";
+  // impulso
+  TF1 *impulseFit = new TF1("impulse fit function", "expo", 0., 7.);
+  hImpulse->Fit(impulseFit, "Q0");
+
+  std::cout << "\nFITTING-------------------------\n\n";
 
   std::cout << " Polar Angle\n"
             << "  Parameter: " << polarFit->GetParameter(0) << " ± "
@@ -85,65 +92,91 @@ void HistoAnalysis() {
             << azimuthalFit->GetChisquare() / azimuthalFit->GetNDF()
             << "\n  Probability: " << azimuthalFit->GetProb();
 
-  // fit impulso
-  TF1 *impulseFit = new TF1("impulse fit function", "expo", 0., 7.);
-  hImpulse->Fit(impulseFit, "Q");
   std::cout << "\n\n Impulse\n"
-            << "  Parameter 1: " << impulseFit->GetParameter(0) << " ± "
+            << "  Width: " << impulseFit->GetParameter(0) << " ± "
             << impulseFit->GetParError(0)
-            << "\n  Parameter 2: " << impulseFit->GetParameter(1) << " ± "
+            << "\n  Mean: " << impulseFit->GetParameter(1) << " ± "
             << impulseFit->GetParError(1) << "\n  Reduced Chi Square: "
             << impulseFit->GetChisquare() / impulseFit->GetNDF()
             << "\n  Probability: " << impulseFit->GetProb();
 
+  // sottrazione istogrammi
+  TH1F *hSubtraction1 = new TH1F(*hIMOppositeCharge);
+  hSubtraction1->Add(hIMOppositeCharge, hIMSameCharge, 1., -1.);
+  TF1 *sub1Fit = new TF1("first subtraction fit", "gaus", 0., 8.);
+  hSubtraction1->Fit(sub1Fit, "Q0");
 
+  TH1F *hSubtraction2 = new TH1F(*hIMOppositePK);
+  hSubtraction2->Add(hIMOppositePK, hIMSamePK, 1., -1.);
+  TF1 *sub2Fit = new TF1("second subtraction fit", "gaus", 0., 8.);
+  hSubtraction2->Fit(sub2Fit, "Q0");
 
+  std::cout << "\n\nOPERATIONS ON HISTOGRAMS-------------------------\n\n";
 
+  std::cout << " Inv. Mass - opposite charge minus Inv. Mass - same charge\n"
+            << "  Width: " << sub1Fit->GetParameter(0) << " ± "
+            << sub1Fit->GetParError(0)
+            << "\n  Mean (i.e. resonance mass): " << sub1Fit->GetParameter(1)
+            << " ± " << sub1Fit->GetParError(1)
+            << "\n  Std Dev (i.e. resonance width): "
+            << sub1Fit->GetParameter(2) << " ± " << sub1Fit->GetParError(2)
+            << "\n  Reduced Chi Square: "
+            << sub1Fit->GetChisquare() / sub1Fit->GetNDF()
+            << "\n  Fit Probability: " << sub1Fit->GetProb();
 
-
-
-
-
-
-
-
-  /*TH1F *h1 = (TH1F *)file->Get("h1");
-  int expectedEntries = 10E7;
-  int entries = histo1->GetEntries();
-  double ratio = entries / expectedEntries;
-  std::cout << "\n\n******** Analisi numero di ingressi ********";
-  std::cout << "\nExpected entries: " << expectedEntries;
-  std::cout << "\nEntries: " << entries;
-  std::cout << "\nRatio:" << histo1->GetNbinsX();
-
-  if (ratio > 1.1) {
-    std::cout << "\nNumero di ingressi troppo alto";
-  } else if (ratio < 0.9) {
-    std::cout << "\nNumero di ingressi troppo basso";
-  } else {
-    std::cout << "\nNumero di ingresi atteso";
-  }
-
-  std::cout << "\n******** Analisi percentuali di particelle ********";
-
-  TH1F *hParticleTypes = (TH1F *)file->Get("hParticleTypes");
-  int expectedPercentages[7] = {
-      0.4, 0.4, 0.05, 0.05, 0, 0, 0};  // allora levo anche getnbins sotto
-  for (int i = 0; i < hParticleTypes->GetNbinsX(); i++) {
-    double upperBound =
-        expectedPercentages[i] + hParticleTypes->GetBinError(i) / entries;
-    double lowerBound =
-        expectedPercentages[i] - hParticleTypes->GetBinError(i) / entries;
-    double percentage = hParticleTypes->GetBinContent(i) / entries;
-    std::cout << "\nTipo di particella: " << i;
-    std::cout << "\nPercentuale sul totale: " << percentage << " +- "
-              << hParticleTypes->GetBinError(i) / entries;
-    if (percentage > upperBound) {
-      std::cout << "\nLa percentuale è maggiore di quella attesa.";
-    } else if (percentage < lowerBound) {
-      std::cout << "\nLa percentuale è minore di quella attesa.";
-    } else {
-      std::cout << "\nLa percentuale è coerente con quella attesa.";
-    }
-  }*/
+  std::cout << "\n\n Inv. Mass - opposite charge pions and kaons minus Inv. "
+               "Mass - same charge pions and kaons\n"
+            << "  Width: " << sub2Fit->GetParameter(0) << " ± "
+            << sub2Fit->GetParError(0)
+            << "\n  Mean (i.e. resonance mass): " << sub2Fit->GetParameter(1)
+            << " ± " << sub2Fit->GetParError(1)
+            << "\n  Std Dev (i.e. resonance width): "
+            << sub2Fit->GetParameter(2) << " ± " << sub2Fit->GetParError(2)
+            << "\n  Reduced Chi Square: "
+            << sub2Fit->GetChisquare() / sub2Fit->GetNDF()
+            << "\n  Fit Probability: " << sub2Fit->GetProb() << "\n\n\n";
 }
+
+
+
+// nel seguito solo porcherie fatte da giovanni brandi da cui mi dissocio completamente e senza riserve
+
+/*TH1F *h1 = (TH1F *)file->Get("h1");
+int expectedEntries = 10E7;
+int entries = histo1->GetEntries();
+double ratio = entries / expectedEntries;
+std::cout << "\n\n******** Analisi numero di ingressi ********";
+std::cout << "\nExpected entries: " << expectedEntries;
+std::cout << "\nEntries: " << entries;
+std::cout << "\nRatio:" << histo1->GetNbinsX();
+
+if (ratio > 1.1) {
+  std::cout << "\nNumero di ingressi troppo alto";
+} else if (ratio < 0.9) {
+  std::cout << "\nNumero di ingressi troppo basso";
+} else {
+  std::cout << "\nNumero di ingresi atteso";
+}
+
+std::cout << "\n******** Analisi percentuali di particelle ********";
+
+TH1F *hParticleTypes = (TH1F *)file->Get("hParticleTypes");
+int expectedPercentages[7] = {
+    0.4, 0.4, 0.05, 0.05, 0, 0, 0};  // allora levo anche getnbins sotto
+for (int i = 0; i < hParticleTypes->GetNbinsX(); i++) {
+  double upperBound =
+      expectedPercentages[i] + hParticleTypes->GetBinError(i) / entries;
+  double lowerBound =
+      expectedPercentages[i] - hParticleTypes->GetBinError(i) / entries;
+  double percentage = hParticleTypes->GetBinContent(i) / entries;
+  std::cout << "\nTipo di particella: " << i;
+  std::cout << "\nPercentuale sul totale: " << percentage << " +- "
+            << hParticleTypes->GetBinError(i) / entries;
+  if (percentage > upperBound) {
+    std::cout << "\nLa percentuale è maggiore di quella attesa.";
+  } else if (percentage < lowerBound) {
+    std::cout << "\nLa percentuale è minore di quella attesa.";
+  } else {
+    std::cout << "\nLa percentuale è coerente con quella attesa.";
+  }
+}*/

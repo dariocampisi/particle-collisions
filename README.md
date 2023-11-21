@@ -1,7 +1,5 @@
 # lab23-24_root
 
-### Shell commands to compile and execute
-
 ```shell
 % root
 ...
@@ -14,5 +12,9 @@
 % .L Main.C+
 ...
 % Main()
+...
+% .L histo_analysis.cpp+
+...
+% HistoAnalysis()
 ```
 
