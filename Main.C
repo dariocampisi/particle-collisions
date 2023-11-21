@@ -27,47 +27,44 @@ int Main() {
   std::vector<Particle> decayParticles{};
 
   // istogrammi (numero bin e range da definire)
-  TH1F *hParticleTypes = new TH1F("h1", "Particle Types", 7, 0., 7.);
-  TH1F *hPolar = new TH1F("h2", "Polar Angle", 100, -10, 10);
-  TH1F *hAzimuthal = new TH1F("h3", "Azimuthal Angle", 100, -10, 10);
-  TH1F *hImpulse = new TH1F("h4", "Impulse", 100, -10, 10);
-  TH1F *hTrsImpulse = new TH1F("h5", "Trasverse Impulse", 100, -10, 10);
-  TH1F *hEnergy = new TH1F("h6", "Energy", 100, -10, 10);
+  TH1F *hParticleTypes = new TH1F("A", "Particle Types", 7, 0., 7.);
+  TH1F *hPolar = new TH1F("B", "Polar Angle", 180, 0., M_PI);
+  TH1F *hAzimuthal = new TH1F("C", "Azimuthal Angle", 360, 0., 2 * M_PI);
+  TH1F *hImpulse = new TH1F("D", "Impulse", 500, 0., 7.);
+  TH1F *hTrsImpulse = new TH1F("E", "Trasverse Impulse", 500, 0., 7.);
+  TH1F *hEnergy = new TH1F("F", "Energy", 100, -10, 10);
 
   // istogrammi massa invariante
-  TH1F *hIMAll = new TH1F("h7", "Invariant Mass", 100, 0., 8.);
+  TH1F *hIMAll = new TH1F("G", "Invariant Mass", 100, 0., 8.);
   hIMAll->Sumw2();
 
   TH1F *hIMOppositeCharge =
-      new TH1F("h8", "Inv. Mass - opposite charge", 100, 0., 8.);
+      new TH1F("H", "Inv. Mass - opposite charge", 100, 0., 8.);
   hIMOppositeCharge->Sumw2();
 
-  TH1F *hIMSameCharge = new TH1F("h9", "Inv. Mass - same charge", 100, 0., 8.);
+  TH1F *hIMSameCharge = new TH1F("I", "Inv. Mass - same charge", 100, 0., 8.);
   hIMSameCharge->Sumw2();
 
-  TH1F *hIMAllPK =
-      new TH1F("histo", "Inv. Mass - pions and kaons", 100, 0., 8.);
-
-  TH1F *hIMOppositePK = new TH1F(
-      "h10", "Inv. Mass - opposite charge pions and kaons", 100, 0., 8.);
+  TH1F *hIMOppositePK =
+      new TH1F("J", "Inv. Mass - opposite charge pions and kaons", 100, 0., 8.);
   hIMOppositePK->Sumw2();
 
   TH1F *hIMSamePK =
-      new TH1F("h11", "Inv. Mass - same charge pions and kaons", 100, 0., 8.);
+      new TH1F("K", "Inv. Mass - same charge pions and kaons", 100, 0., 8.);
   hIMSamePK->Sumw2();
 
   TH1F *hIMDecayParticles =
-      new TH1F("h12", "Inv. Mass - decay particles", 100, 0.7, 1.1);
+      new TH1F("L", "Inv. Mass - decay particles", 100, 0.7, 1.1);
   hIMDecayParticles->Sumw2();
 
   // inizio dei 1e5 eventi
   for (int n = 0; n < 1e5; ++n) {
     for (int i = 0; i < 100; ++i) {
-      double phi = gRandom->Uniform(0, 2 * M_PI);
-      hAzimuthal->Fill(phi);
-
       double theta = gRandom->Uniform(0, M_PI);
       hPolar->Fill(theta);
+
+      double phi = gRandom->Uniform(0, 2 * M_PI);
+      hAzimuthal->Fill(phi);
 
       double p = gRandom->Exp(1.);
       eventParticles[i].SetP(p * std::sin(theta) * std::cos(phi),
@@ -187,6 +184,8 @@ int Main() {
   hIMDecayParticles->Write();
 
   file->Close();
+
+  hImpulse->Draw();
 
   return 0;
 }
