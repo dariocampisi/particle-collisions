@@ -8,8 +8,7 @@
 #include "resonance_type.hpp"
 
 int Main() {
-  TCanvas *canvas = new TCanvas("c", "canvas", 1280, 720);
-  gRandom->SetSeed(653);
+  gRandom->SetSeed(314234);
 
   Particle::AddParticleType("pione+", 0.13957, 1);     // pione+
   Particle::AddParticleType("pione-", 0.13957, -1);    // pione-
@@ -28,34 +27,33 @@ int Main() {
   std::vector<Particle> decayParticles{};
 
   // istogrammi (numero bin e range da definire)
-  TH1F *hParticleTypes = new TH1F("h1", "Particle Types", 7, 0, 7);
-  TH1F *hPolar = new TH1F("h2", "Polar Angle", 100, -100000, 100000);
-  TH1F *hAzimuthal = new TH1F("h3", "Azimuthal Angle", 100, -100000, 1000000);
-  TH1F *hImpulse = new TH1F("h4", "Impulse", 100, -100000, 10000000);
-  TH1F *hTrsImpulse = new TH1F("h5", "Trasverse Impulse", 100, -100000, 100000);
-  TH1F *hEnergy = new TH1F("h6", "Energy", 100, -1000000, 1000000);
+  TH1F *hParticleTypes = new TH1F("h1", "Particle Types", 7, 0., 7.);
+  TH1F *hPolar = new TH1F("h2", "Polar Angle", 100, -10, 10);
+  TH1F *hAzimuthal = new TH1F("h3", "Azimuthal Angle", 100, -10, 10);
+  TH1F *hImpulse = new TH1F("h4", "Impulse", 100, -10, 10);
+  TH1F *hTrsImpulse = new TH1F("h5", "Trasverse Impulse", 100, -10, 10);
+  TH1F *hEnergy = new TH1F("h6", "Energy", 100, -10, 10);
 
   // istogrammi massa invariante
-  TH1F *hIMAll = new TH1F("h7", "Invariant Mass", 100, 0, 10000);
+  TH1F *hIMAll = new TH1F("h7", "Invariant Mass", 100, 0., 8.);
   hIMAll->Sumw2();
 
   TH1F *hIMOppositeCharge =
-      new TH1F("h8", "Inv. Mass - opposite charge", 100, 0, 10000);
+      new TH1F("h8", "Inv. Mass - opposite charge", 100, 0., 8.);
   hIMOppositeCharge->Sumw2();
 
-  TH1F *hIMSameCharge =
-      new TH1F("h9", "Inv. Mass - same charge", 100, 0, 10000);
+  TH1F *hIMSameCharge = new TH1F("h9", "Inv. Mass - same charge", 100, 0., 8.);
   hIMSameCharge->Sumw2();
 
   TH1F *hIMAllPK =
-      new TH1F("histo", "Inv. Mass - pions and kaons", 100, 0, 10000);
+      new TH1F("histo", "Inv. Mass - pions and kaons", 100, 0., 8.);
 
   TH1F *hIMOppositePK = new TH1F(
-      "h10", "Inv. Mass - opposite charge pions and kaons", 100, 0, 10000);
+      "h10", "Inv. Mass - opposite charge pions and kaons", 100, 0., 8.);
   hIMOppositePK->Sumw2();
 
   TH1F *hIMSamePK =
-      new TH1F("h11", "Inv. Mass - same charge pions and kaons", 100, 0, 10000);
+      new TH1F("h11", "Inv. Mass - same charge pions and kaons", 100, 0., 8.);
   hIMSamePK->Sumw2();
 
   TH1F *hIMDecayParticles =
@@ -131,31 +129,36 @@ int Main() {
         // tutte le particelle
         hIMAll->Fill(eventParticles[i].InvariantMass(eventParticles[j]));
 
-        // segno discorde (esclude automaticamente le risonanze)
+        // segno discorde
         if (eventParticles[i].GetCharge() * eventParticles[j].GetCharge() ==
             -1) {
           hIMOppositeCharge->Fill(
               eventParticles[i].InvariantMass(eventParticles[j]));
-        }
 
-        // pioni e Kaoni tutti
-        if ((eventParticles[i].GetMass() + eventParticles[j].GetMass()) ==
-            0.63324) {
-          hIMAllPK->Fill(eventParticles[i].InvariantMass(eventParticles[j]));
+          // pioni e kaoni discordi
+          if ((eventParticles[i].GetMass() + eventParticles[j].GetMass()) ==
+              0.63324) {
+            hIMOppositePK->Fill(
+                eventParticles[i].InvariantMass(eventParticles[j]));
+          }
+        }
+        // segno concorde
+        else if (eventParticles[i].GetCharge() *
+                     eventParticles[j].GetCharge() ==
+                 1) {
+          hIMSameCharge->Fill(
+              eventParticles[i].InvariantMass(eventParticles[j]));
+
+          // pioni e kaoni concordi
+          if ((eventParticles[i].GetMass() + eventParticles[j].GetMass()) ==
+              0.63324) {
+            hIMSamePK->Fill(eventParticles[i].InvariantMass(eventParticles[j]));
+          }
         }
       }
     }
 
-    // segno concorde
-    hIMSameCharge->Add(hIMAll, hIMOppositeCharge, 1, -1);
-
-    // pioni e Kaoni discordi
-    hIMOppositePK->Add(hIMAllPK, hIMSameCharge, 1, -1);
-
-    // pioni e Kaoni concordi
-    hIMSamePK->Add(hIMAllPK, hIMOppositeCharge, 1, -1);
-
-    // figlie delle risonanze
+    // particelle di decadimento
     for (unsigned long i = 0; i < decayParticles.size(); i += 2) {
       hIMDecayParticles->Fill(
           decayParticles[i].InvariantMass(decayParticles[i + 1]));
@@ -165,10 +168,10 @@ int Main() {
                          eventParticles.end());
     decayParticles.clear();
 
-  }  // fine dei 10e5 eventi
+  }  // fine dei 1e5 eventi
 
-  // inserimento degli istogrammi in un file ROOT - per ora lasciamo stare
-  /* TFile *file = new TFile("histograms.root");
+  // inserimento degli istogrammi in un file ROOT
+  TFile *file = new TFile("histograms.root", "RECREATE");
 
   hParticleTypes->Write();
   hPolar->Write();
@@ -183,11 +186,7 @@ int Main() {
   hIMSamePK->Write();
   hIMDecayParticles->Write();
 
-  file->Close(); */
-
-  // hParticleTypes->Draw("hist");
-  // hIMDecayParticles->Draw("hist");
-  hIMOppositePK->Draw("hist");
+  file->Close();
 
   return 0;
 }
