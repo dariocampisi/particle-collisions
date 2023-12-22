@@ -4,27 +4,14 @@
 #include <cstdlib>  // for RAND_MAX
 #include <iostream>
 
-// forward declaration pazza malata
 std::vector<ParticleType *> Particle::fParticleTypes;
 
-// non avevamo implementato un controllo sul costruttore di Particle si potrebbe
-// inserire una particella il cui tipo non si trova nel vettore fParticleTypes
-// in tal caso la costruzione deve fallire, quell'istanza di Particle non deve
-// essere creata
-// il modo migliore per farlo è tirare un'eccezione
-// la gestione dell'eccezione non si ferma qui, al corpo del costruttore (dove
-// usiamo throw), infatti ogni volta che si crea un'istanza di (o un puntatore
-// a) Particle usando questo costruttore, bisogna inserire un blocco try -
-// catch, tuttavia l'unico punto del codice in cui viene creato un puntatore a
-// Particle utilizzando questo costruttore è il metodo
-// Particle::AddParticleType, in tutto il resto del codice usiamo il costruttore
-// di default
 Particle::Particle(const char *name, double px, double py, double pz)
     : fPx{px}, fPy{py}, fPz{pz} {
-  if (FindParticleType(name) != -1) {
-    fIndex = FindParticleType(name);
+  if (FindParticleType(name) == -1) {
+    throw std::invalid_argument("particle type not found\n");
   } else {
-    throw std::invalid_argument("particle type not found");
+    fIndex = FindParticleType(name);
   }
 }
 
@@ -71,12 +58,8 @@ void Particle::SetP(double px, double py, double pz) {
 
 void Particle::AddParticleType(const char *name, const double mass,
                                const int charge, const double width) {
-  try {
-    ParticleType *type = new ResonanceType(name, mass, charge, width);
-    fParticleTypes.push_back(type);
-  } catch (const std::exception &e) {
-    std::cerr << "Error: " << e.what() << '\n';
-  }
+  ParticleType *type = new ResonanceType(name, mass, charge, width);
+  fParticleTypes.push_back(type);
 }
 
 void Particle::PrintParticleTypes() {

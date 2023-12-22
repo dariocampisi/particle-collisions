@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TH1.h"
@@ -20,8 +22,12 @@ int Main() {
 
   std::vector<Particle> eventParticles{};
   for (int i = 0; i < 100; ++i) {
-    Particle p;
-    eventParticles.push_back(p);
+    try {
+      Particle p;
+      eventParticles.push_back(p);
+    } catch (const std::exception &e) {
+      std::cerr << "Error: " << e.what();
+    }
   }
 
   std::vector<Particle> decayParticles{};
@@ -93,21 +99,25 @@ int Main() {
       } else {
         eventParticles[i].SetIndex("K*");
 
-        Particle p1{};
-        Particle p2{};
+        try {
+          Particle p1{};
+          Particle p2{};
 
-        if (std::rand() % 2) {
-          p1.SetIndex("pione+");
-          p2.SetIndex("Kaone-");
-        } else {
-          p1.SetIndex("pione-");
-          p2.SetIndex("Kaone+");
+          if (std::rand() % 2) {
+            p1.SetIndex("pione+");
+            p2.SetIndex("Kaone-");
+          } else {
+            p1.SetIndex("pione-");
+            p2.SetIndex("Kaone+");
+          }
+
+          eventParticles[i].Decay2body(p1, p2);
+
+          decayParticles.push_back(p1);
+          decayParticles.push_back(p2);
+        } catch (const std::exception &e) {
+          std::cerr << "Error: " << e.what();
         }
-
-        eventParticles[i].Decay2body(p1, p2);
-
-        decayParticles.push_back(p1);
-        decayParticles.push_back(p2);
       }
     }  // fine della generazione delle ~100 particelle
 
