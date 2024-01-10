@@ -18,8 +18,10 @@ void HistoAnalysis() {
   TH1F *hIMAll = (TH1F *)file->Get("Invariant Mass");
   TH1F *hIMOppositeCharge = (TH1F *)file->Get("Inv. Mass - opposite charge");
   TH1F *hIMSameCharge = (TH1F *)file->Get("Inv. Mass - same charge");
-  TH1F *hIMOppositePK = (TH1F *)file->Get("Inv. Mass - opposite charge pions and kaons");
-  TH1F *hIMSamePK = (TH1F *)file->Get("Inv. Mass - same charge pions and kaons");
+  TH1F *hIMOppositePK =
+      (TH1F *)file->Get("Inv. Mass - opposite charge pions and kaons");
+  TH1F *hIMSamePK =
+      (TH1F *)file->Get("Inv. Mass - same charge pions and kaons");
   TH1F *hIMDecayParticles = (TH1F *)file->Get("Inv. Mass - decay particles");
 
   std::vector<TH1F *> histoVector{
