@@ -9,18 +9,18 @@
 void HistoAnalysis() {
   TFile *file = new TFile("histograms.root");
 
-  TH1F *hParticleTypes = (TH1F *)file->Get("A");
-  TH1F *hPolar = (TH1F *)file->Get("B");
-  TH1F *hAzimuthal = (TH1F *)file->Get("C");
-  TH1F *hImpulse = (TH1F *)file->Get("D");
-  TH1F *hTrsImpulse = (TH1F *)file->Get("E");
-  TH1F *hEnergy = (TH1F *)file->Get("F");
-  TH1F *hIMAll = (TH1F *)file->Get("G");
-  TH1F *hIMOppositeCharge = (TH1F *)file->Get("H");
-  TH1F *hIMSameCharge = (TH1F *)file->Get("I");
-  TH1F *hIMOppositePK = (TH1F *)file->Get("J");
-  TH1F *hIMSamePK = (TH1F *)file->Get("K");
-  TH1F *hIMDecayParticles = (TH1F *)file->Get("L");
+  TH1F *hParticleTypes = (TH1F *)file->Get("Particle Types");
+  TH1F *hPolar = (TH1F *)file->Get("Polar Angle");
+  TH1F *hAzimuthal = (TH1F *)file->Get("Azimuthal Angle");
+  TH1F *hImpulse = (TH1F *)file->Get("Impulse");
+  TH1F *hTrsImpulse = (TH1F *)file->Get("Trasverse Impulse");
+  TH1F *hEnergy = (TH1F *)file->Get("Energy");
+  TH1F *hIMAll = (TH1F *)file->Get("Invariant Mass");
+  TH1F *hIMOppositeCharge = (TH1F *)file->Get("Inv. Mass - opposite charge");
+  TH1F *hIMSameCharge = (TH1F *)file->Get("Inv. Mass - same charge");
+  TH1F *hIMOppositePK = (TH1F *)file->Get("Inv. Mass - opposite charge pions and kaons");
+  TH1F *hIMSamePK = (TH1F *)file->Get("Inv. Mass - same charge pions and kaons");
+  TH1F *hIMDecayParticles = (TH1F *)file->Get("Inv. Mass - decay particles");
 
   std::vector<TH1F *> histoVector{
       hParticleTypes, hPolar,        hAzimuthal, hImpulse,
@@ -136,47 +136,3 @@ void HistoAnalysis() {
             << sub2Fit->GetChisquare() / sub2Fit->GetNDF()
             << "\n  Fit Probability: " << sub2Fit->GetProb() << "\n\n\n";
 }
-
-
-
-// nel seguito solo porcherie scritte da giovanni brandi da cui mi dissocio completamente e senza riserve
-
-/*TH1F *h1 = (TH1F *)file->Get("h1");
-int expectedEntries = 10E7;
-int entries = histo1->GetEntries();
-double ratio = entries / expectedEntries;
-std::cout << "\n\n******** Analisi numero di ingressi ********";
-std::cout << "\nExpected entries: " << expectedEntries;
-std::cout << "\nEntries: " << entries;
-std::cout << "\nRatio:" << histo1->GetNbinsX();
-
-if (ratio > 1.1) {
-  std::cout << "\nNumero di ingressi troppo alto";
-} else if (ratio < 0.9) {
-  std::cout << "\nNumero di ingressi troppo basso";
-} else {
-  std::cout << "\nNumero di ingresi atteso";
-}
-
-std::cout << "\n******** Analisi percentuali di particelle ********";
-
-TH1F *hParticleTypes = (TH1F *)file->Get("hParticleTypes");
-int expectedPercentages[7] = {
-    0.4, 0.4, 0.05, 0.05, 0, 0, 0};  // allora levo anche getnbins sotto
-for (int i = 0; i < hParticleTypes->GetNbinsX(); i++) {
-  double upperBound =
-      expectedPercentages[i] + hParticleTypes->GetBinError(i) / entries;
-  double lowerBound =
-      expectedPercentages[i] - hParticleTypes->GetBinError(i) / entries;
-  double percentage = hParticleTypes->GetBinContent(i) / entries;
-  std::cout << "\nTipo di particella: " << i;
-  std::cout << "\nPercentuale sul totale: " << percentage << " +- "
-            << hParticleTypes->GetBinError(i) / entries;
-  if (percentage > upperBound) {
-    std::cout << "\nLa percentuale è maggiore di quella attesa.";
-  } else if (percentage < lowerBound) {
-    std::cout << "\nLa percentuale è minore di quella attesa.";
-  } else {
-    std::cout << "\nLa percentuale è coerente con quella attesa.";
-  }
-}*/
