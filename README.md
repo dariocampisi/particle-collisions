@@ -1,5 +1,3 @@
-# lab23-24_root
-
 ```shell
 % root
 ...
